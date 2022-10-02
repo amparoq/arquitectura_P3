@@ -1,0 +1,3 @@
+La instrucción ADL de la linea 3 no existe
+La instrucción HJI de la linea 7 no existe
+El código finalizó con errores

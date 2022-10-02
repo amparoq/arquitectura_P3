@@ -1,0 +1,7 @@
+MOV A,B
+JEQ final
+ADL A,B
+ADD A,b
+JMP ciclo
+CMP A,B 
+HJI A,B
