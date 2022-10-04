@@ -1,10 +1,12 @@
     MOV B,(A)
     JEQ final
+    MOV A,B,C
 ciclo:
     ADL A,B
     ADD A,B
     OR (A)
-    JMP ciclo
+    JMP ciclo,A
+    NOT (Dir),A
 final
     CMP A,B 
     HJI A,B
