@@ -1,7 +1,7 @@
 inst_e = ["MOV","ADD","SUB","AND","OR","NOT","XOR","SHL","SHR","INC","CMP","JMP","JEQ","JNE","JGT","JLT","JGE","JLE","JCR","JOV","CALL","RET","POP","PUSH"]
 instMOV = ["A,B","B,A","A,(B)","B,(B)","(B),A"] #instrucciones que se pueden, las otras hay que ver casos especiales
-instADDANDSUBOR = ["A,B","B,A","A,(B)","(B),A"]
-instNOT = ["A,B","A,A","B,A","B,B"]
+instADDANDSUBORXOR = ["A,B","B,A","A,(B)","(B),A"]
+instNOTSHLSHR = ["A,B","A,A","B,A","B,B"]
 jumps = ["JMP","JEQ","JNE","JGT","JLT","JGE","JLE","JCR","JOV"]
 
 codigo = open("prueba.ass",'r')
@@ -58,8 +58,8 @@ for inst in instrucciones:
             if len(valores) != 2:
                 respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
                 error = 1
-    if inst == "AND" or inst == "ADD" or inst == "SUB" or inst == "OR":
-        if datos[ndl] not in instADDANDSUBOR:
+    if inst == "AND" or inst == "ADD" or inst == "SUB" or inst == "OR" or inst == "XOR":
+        if datos[ndl] not in instADDANDSUBORXOR:
             valores = datos[ndl].split(",")
             if len(valores) == 2:
                 if valores[0][0] == "(":
@@ -79,8 +79,8 @@ for inst in instrucciones:
                 respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
                 error = 1
 
-    if inst == "NOT":
-        if datos[ndl] not in instNOT:
+    if inst == "NOT" or inst == "SHL" or inst == "SHR":
+        if datos[ndl] not in instNOTSHLSHR:
             valores = datos[ndl].split(",")
             if len(valores) == 2:
                 if valores[0][0] == "(":
@@ -109,6 +109,39 @@ for inst in instrucciones:
             respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
             error = 1
     
+    if inst == "RST":
+        valores = datos[ndl].split(",")
+        if len(valores) == 1:
+            if valores[0][0] == "(":
+                if valores[0][1] == "A":
+                    respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
+                    error = 1
+            else:
+                respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
+                error = 1
+        if len(valores) != 1:
+            respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
+            error = 1
+    
+    if inst == "CMP":
+        if datos[ndl] != "A,B" and datos[ndl] != "A,(B)":
+            valores = datos[ndl].split(",")
+            if len(valores) == 2:
+                if valores[0][0] == "(":
+                    if valores[0][1] == "A" or valores[0][1] == "B":
+                        respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
+                        error = 1
+                if valores[1][0] == "(":
+                    if valores[1][1] == "A" or valores[1][1] == "B":
+                        respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
+                        error = 1
+                if valores[0][0] == "(" and valores[1][0] == "(":
+                    respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
+                    error = 1
+            else:
+                respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
+                error = 1
+
 
     if inst in jumps:
         encontrada = 0
