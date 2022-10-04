@@ -31,10 +31,10 @@ for linea in lineas:
                 if linea_b[0:2] == "OR":
                     instruccion = linea_b[0:2]
                     dato = linea_b[2:largo]
-                if linea_b[0:4] == "PUSH":
+                if linea_b[0:4] == "PUSH" or linea_b[0:4] == "CALL":
                     instruccion = linea_b[0:4]
                     dato = linea_b[4:largo]
-                if linea_b[0:2] != "OR" and linea_b[0:4] != "PUSH":
+                if linea_b[0:2] != "OR" and linea_b[0:4] != "PUSH" and linea_b[0:4] != "CALL":
                     instruccion = linea_b[0:3]
                     largo = len(linea_b)
                     dato = linea_b[3:largo]
