@@ -1,8 +1,12 @@
+import re
+
 inst_e = ["MOV","ADD","SUB","AND","OR","NOT","XOR","SHL","SHR","INC","CMP","JMP","JEQ","JNE","JGT","JLT","JGE","JLE","JCR","JOV","CALL","RET","POP","PUSH"]
 instMOV = ["A,B","B,A","A,(B)","B,(B)","(B),A"] #instrucciones que se pueden, las otras hay que ver casos especiales
 instADDANDSUBORXOR = ["A,B","B,A","A,(B)","(B),A"]
 instNOTSHLSHR = ["A,B","A,A","B,A","B,B"]
 jumps = ["JMP","JEQ","JNE","JGT","JLT","JGE","JLE","JCR","JOV"]
+
+literal = re.compile('[0-9]+')
 
 codigo = open("prueba.ass",'r')
 respuesta = open("respuesta.txt",'w')
@@ -55,9 +59,16 @@ for inst in instrucciones:
                     if valores[1][1] == "A":
                         respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
                         error = 1
+                if literal.search(valores[0]) != None:
+                    respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
+                    error = 1
+                if valores[0][0] == "(" and valores[1][0] == "(":
+                    respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
+                    error = 1
             if len(valores) != 2:
                 respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
                 error = 1
+
     if inst == "AND" or inst == "ADD" or inst == "SUB" or inst == "OR" or inst == "XOR":
         if datos[ndl] not in instADDANDSUBORXOR:
             valores = datos[ndl].split(",")
@@ -70,6 +81,12 @@ for inst in instrucciones:
                     if valores[1][1] == "A":
                         respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
                         error = 1
+                if literal.search(valores[0]) != None:
+                    respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
+                    error = 1
+                if valores[0][0] == "(" and valores[1][0] == "(":
+                    respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
+                    error = 1
             if len(valores) == 1:
                 if valores[0][0] == "(":
                     if valores[0][1] == "A" or valores[0][1] == "B":
@@ -91,6 +108,12 @@ for inst in instrucciones:
                     if valores[1][1] == "A" or valores[1][1] == "B":
                         respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
                         error = 1
+                if literal.search(valores[0]) != None:
+                    respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
+                    error = 1
+                if valores[0][0] == "(" and valores[1][0] == "(":
+                    respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
+                    error = 1
             if len(valores) == 1:
                 if valores[0] != "(B)":
                     respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
@@ -105,7 +128,13 @@ for inst in instrucciones:
             if valores[0][1] == "A":
                 respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
                 error = 1
+            if literal.search(valores[0][1]) != None:
+                respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
+                error = 1
         if len(valores) != 1:
+            respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
+            error = 1
+        if literal.search(valores[0]) != None:
             respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
             error = 1
     
@@ -117,6 +146,9 @@ for inst in instrucciones:
                     respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
                     error = 1
             else:
+                respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
+                error = 1
+            if literal.search(valores[0]) != None:
                 respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
                 error = 1
         if len(valores) != 1:
@@ -138,10 +170,12 @@ for inst in instrucciones:
                 if valores[0][0] == "(" and valores[1][0] == "(":
                     respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
                     error = 1
+                if literal.search(valores[0]) != None:
+                    respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
+                    error = 1
             else:
                 respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
                 error = 1
-
 
     if inst in jumps:
         encontrada = 0
