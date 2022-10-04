@@ -8,8 +8,8 @@ jumps = ["JMP","JEQ","JNE","JGT","JLT","JGE","JLE","JCR","JOV"]
 
 literal = re.compile('[0-9]+')
 
-codigo = open("prueba.ass",'r')
-respuesta = open("respuesta.txt",'w')
+codigo = open("p3F_2i.ass",'r')
+respuesta = open("respuesta.out",'w')
 
 p = codigo.read()
 lineas = p.split("\n")
@@ -25,15 +25,16 @@ for linea in lineas:
         if linea_b[0:3].islower():
             etiquetas.append(linea)
         else:
-            if linea_b[0:2] == "OR":
-                instruccion = linea_b[0:2]
-                dato = linea_b[2:largo]
-            else:
-                instruccion = linea_b[0:3]
-                largo = len(linea_b)
-                dato = linea_b[3:largo]
-            instrucciones.append(instruccion)
-            datos.append(dato)
+            if linea_b != "CODE:":
+                if linea_b[0:2] == "OR":
+                    instruccion = linea_b[0:2]
+                    dato = linea_b[2:largo]
+                else:
+                    instruccion = linea_b[0:3]
+                    largo = len(linea_b)
+                    dato = linea_b[3:largo]
+                instrucciones.append(instruccion)
+                datos.append(dato)
 
 ndl = 0
 error = 0
@@ -185,6 +186,20 @@ for inst in instrucciones:
         if encontrada == 0:
             respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe. La etiqueta {datos[ndl]} no existe o está mal declarada\n')
             error = 1
+    
+    if inst == "RET":
+        if datos[ndl] != "" or datos[ndl] != " ":
+            respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe. La etiqueta {datos[ndl]} no existe o está mal declarada\n')
+            error = 1
+    
+    if inst == "POP" or inst == "PUSH":
+        if datos[ndl] != "A" or datos[ndl] != "B":
+            respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe. La etiqueta {datos[ndl]} no existe o está mal declarada\n')
+            error = 1
+    
+    if inst == "CALL":
+        pass
+
         
     ndl+=1
 
