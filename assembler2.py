@@ -199,7 +199,7 @@ for inst in instrucciones:
                 error = 1
         
         if inst == "POP" or inst == "PUSH":
-            if datos[ndl] != "A" or datos[ndl] != "B":
+            if datos[ndl] != "A" and datos[ndl] != "B":
                 respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
                 error = 1
         
