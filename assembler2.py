@@ -10,6 +10,7 @@ literal = re.compile('[0-9]+$')
 
 codigo = open("p3_1-correccion1.ass",'r')
 respuesta = open("respuesta.out",'w')
+traduccion = open("traduccion.out",'w')
 
 p = codigo.read()
 lineas = p.split("\n")
@@ -65,7 +66,6 @@ for inst in instrucciones:
                 if len(valores) != 2:
                     respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
                     error = 1
-
         if inst == "AND" or inst == "ADD" or inst == "SUB" or inst == "OR" or inst == "XOR":
             if datos[ndl] not in instADDANDSUBORXOR:
                 valores = datos[ndl].split(",")
@@ -195,6 +195,45 @@ for inst in instrucciones:
                 error = 1
     if inst == 0:
         pass
+    if error != 1:
+        opcode=""
+        lit= ""
+        if inst == "MOV":
+            if datos[ndl] in instMOV:
+                if datos[ndl] == instMOV[0]:
+                    opcode = "0000000"
+                if datos[ndl] == instMOV[1]:
+                    opcode = "0000001"
+                if datos[ndl] == instMOV[2]:
+                    opcode = "0101001"
+                if datos[ndl] == instMOV[3]:
+                    opcode = "0101010"
+                if datos[ndl] == instMOV[4]:
+                    opcode = "0101011"
+                lit = "00000000"
+            else:
+                valores = datos[ndl].split(",")
+                if literal.search(valores[1]) != None:
+                    lit_num = int(valores[1])
+                    lit_b = str(bin(lit_num))
+                    lit = lit_b[2:len(lit_b)]
+                    if valores[0] == "A":
+                        opcode = "0000010"
+                    if valores[0] == "B":
+                        opcode = "0000011"
+                if valores[0][0]=="(":
+                    if valores[1] == "A":
+                        opcode = "0100111"
+                    if valores[1] == "B":
+                        opcode = "0101000"
+                    lit = "00000000"
+                if valores[1][0]=="(":
+                    if valores[0] == "A":
+                        opcode = "0100101"
+                    if valores[0] == "B":
+                        opcode = "0100110"
+                    lit = "00000000"
+    traduccion.write(f'{opcode}{lit}\n')                     
     ndl+=1
 
 
