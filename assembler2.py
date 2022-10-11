@@ -1,14 +1,14 @@
 import re
 
-inst_e = ["MOV","ADD","SUB","AND","OR","NOT","XOR","SHL","SHR","INC","CMP","JMP","JEQ","JNE","JGT","JLT","JGE","JLE","JCR","JOV","CALL","RET","POP","PUSH"]
+inst_e = ["MOV","ADD","SUB","AND","OR","NOT","XOR","RST","SHL","SHR","INC","CMP","JMP","JEQ","JNE","JGT","JLT","JGE","JLE","JCR","JOV","CALL","RET","POP","PUSH","RST"]
 instMOV = ["A,B","B,A","A,(B)","B,(B)","(B),A"] #instrucciones que se pueden, las otras hay que ver casos especiales
 instADDANDSUBORXOR = ["A,B","B,A","A,(B)","(B),A"]
 instNOTSHLSHR = ["A,B","A,A","B,A","B,B"]
-jumps = ["JMP","JEQ","JNE","JGT","JLT","JGE","JLE","JCR","JOV"]
+jumps = ["JMP","JEQ","JNE","JGT","JLT","JGE","JLE","JCR","JOV","CALL"]
 
-literal = re.compile('[0-9]+')
+literal = re.compile('[0-9]+$')
 
-codigo = open("prueba.ass",'r')
+codigo = open("p3_1-correccion1.ass",'r')
 respuesta = open("respuesta.out",'w')
 
 p = codigo.read()
@@ -20,34 +20,24 @@ etiquetas = []
 for linea in lineas:
     l = 0
     uvpl = 0
-    linea_b = linea.replace(" ","")
-    if linea != "":
-        if linea_b[0:3].islower():
-            etiquetas.append(linea)
-            instrucciones.append(0)
-            datos.append(0)
+    lin = linea.split(" ")
+    if len(lin) != 0:
+        if len(lin) == 1:
+            if lin[0] != "CODE:":
+                etiquetas.append(linea)
+                instrucciones.append(0)
+                datos.append(0)
         else:
-            if linea_b != "CODE:":
-                if linea_b[0:2] == "OR":
-                    instruccion = linea_b[0:2]
-                    dato = linea_b[2:largo]
-                if linea_b[0:4] == "PUSH" or linea_b[0:4] == "CALL":
-                    instruccion = linea_b[0:4]
-                    dato = linea_b[4:largo]
-                if linea_b[0:2] != "OR" and linea_b[0:4] != "PUSH" and linea_b[0:4] != "CALL":
-                    instruccion = linea_b[0:3]
-                    largo = len(linea_b)
-                    dato = linea_b[3:largo]
-                instrucciones.append(instruccion)
-                datos.append(dato)
-
+            instrucciones.append(lin[len(lin)-2])
+            datos.append(lin[len(lin)-1])
 ndl = 0
 error = 0
 
 for e in etiquetas:
-    if e[-1] != ":":
-        respuesta.write(f'Error: La etiqueta {e} no contiene ":"\n')
-        error = 1
+    if e != "":
+        if e[-1] != ":":
+            respuesta.write(f'Error: La etiqueta {e} no contiene ":"\n')
+            error = 1
 
 for inst in instrucciones:
     if inst != 0:
@@ -190,8 +180,9 @@ for inst in instrucciones:
                 if i[0:-1] == datos[ndl]:
                     encontrada = 1
             if encontrada == 0:
-                respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe. La etiqueta {datos[ndl]} no existe o está mal declarada\n')
-                error = 1
+                if datos[ndl][0] != "#" and literal.search(datos[ndl]) == None:
+                    respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe. La etiqueta {datos[ndl]} no existe o está mal declarada\n')
+                    error = 1
         
         if inst == "RET":
             if datos[ndl] != "" or datos[ndl] != " ":
@@ -202,9 +193,6 @@ for inst in instrucciones:
             if datos[ndl] != "A" and datos[ndl] != "B":
                 respuesta.write(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
                 error = 1
-        
-        if inst == "CALL":
-            pass
     if inst == 0:
         pass
     ndl+=1
