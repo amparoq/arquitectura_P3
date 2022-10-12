@@ -14,22 +14,31 @@ traduccion = open("traduccion.out",'w')
 p = codigo.read()
 lineas = p.split("\n")
 
+literal_c = False
+
 instrucciones = []
 datos = []
 etiquetas = []
 for linea in lineas:
     l = 0
     uvpl = 0
-    lin = linea.split(" ")
+    l = linea.strip()
+    lin = l.split(",")
+    prim_seg = lin[0].split(" ")
     if len(lin) != 0:
         if len(lin) == 1:
-            if lin[0] != "CODE:":
-                etiquetas.append(linea)
-                instrucciones.append(0)
-                datos.append(0)
+            if len(prim_seg) == 2:
+                instrucciones.append(prim_seg[0])
+                datos.append(prim_seg[1])
+            else:
+                if lin[0] != "CODE:":
+                    etiquetas.append(linea)
+                    instrucciones.append(0)
+                    datos.append(0)
         else:
-            instrucciones.append(lin[len(lin)-2])
-            datos.append(lin[len(lin)-1])
+            instrucciones.append(prim_seg[0])
+            dat = prim_seg[1]+","+lin[1].replace(" ","")
+            datos.append(dat)
 ndl = 0
 error = 0
 
@@ -217,51 +226,69 @@ if error != 1:
             else:
                 valores = datos[ndl].split(",")
                 if literal.search(valores[1]) != None:
-                    lit_num = int(valores[1])
-                    lit_b = str(bin(lit_num))
-                    lit = lit_b[2:len(lit_b)].zfill(8)
                     if valores[0] == "A":
                         opcode = "0000010"
                     if valores[0] == "B":
                         opcode = "0000011"
-                if valores[0][0]=="(":
-                    if valores[1] == "A":
-                        opcode = "0100111"
-                    if valores[1] == "B":
-                        opcode = "0101000"
-                    num_1 = valores[0].replace("(","")
-                    num = num_1.replace(")","")
-                    if num[0] == "#":
-                        lit_num = int(num[1:len(num)],base=16)
+                    if valores[1][0] == "#":
+                        lit_num = int(valores[1][1:len(valores[1])],base=16)
                         lit_b = str(bin(lit_num))
                         lit = lit_b[2:len(lit_b)].zfill(8)
+                        literal_c = True
                     else:
-                        if literal.search(num) != None:
-                            lit_num = int(num)
+                        if len(valores[1])==1:
+                            lit_num = int(valores[1])
+                            lit_b = str(bin(lit_num))
+                            lit = lit_b[2:len(lit_b)].zfill(8)
+                            literal_c = True
+                        else:
+                            if valores[1][1] == "b":
+                                lit = valores[1][2:len(valores[1])]
+                                literal_c = True
+                            else:
+                                lit_num = int(valores[1])
+                                lit_b = str(bin(lit_num))
+                                lit = lit_b[2:len(lit_b)].zfill(8)
+                                literal_c = True
+                if literal_c == False:
+                    if valores[0][0]=="(":
+                        if valores[1] == "A":
+                            opcode = "0100111"
+                        if valores[1] == "B":
+                            opcode = "0101000"
+                        num_1 = valores[0].replace("(","")
+                        num = num_1.replace(")","")
+                        if num[0] == "#":
+                            lit_num = int(num[1:len(num)],base=16)
                             lit_b = str(bin(lit_num))
                             lit = lit_b[2:len(lit_b)].zfill(8)
                         else:
-                            if num[1] == "b":
-                                lit = num[2:len(num)]
-                if valores[1][0]=="(":
-                    if valores[0] == "A":
-                        opcode = "0100101"
-                    if valores[0] == "B":
-                        opcode = "0100110"
-                    num_1 = valores[1].replace("(","")
-                    num = num_1.replace(")","")
-                    if num[0] == "#":
-                        lit_num = int(num[1:len(num)],base=16)
-                        lit_b = str(bin(lit_num))
-                        lit = lit_b[2:len(lit_b)].zfill(8)
-                    else:
-                        if literal.search(num) != None:
-                            lit_num = int(num)
+                            if literal.search(num) != None:
+                                lit_num = int(num)
+                                lit_b = str(bin(lit_num))
+                                lit = lit_b[2:len(lit_b)].zfill(8)
+                            else:
+                                if num[1] == "b":
+                                    lit = num[2:len(num)]
+                    if valores[1][0]=="(":
+                        if valores[0] == "A":
+                            opcode = "0100101"
+                        if valores[0] == "B":
+                            opcode = "0100110"
+                        num_1 = valores[1].replace("(","")
+                        num = num_1.replace(")","")
+                        if num[0] == "#":
+                            lit_num = int(num[1:len(num)],base=16)
                             lit_b = str(bin(lit_num))
                             lit = lit_b[2:len(lit_b)].zfill(8)
                         else:
-                            if num[1] == "b":
-                                lit = num[2:len(num)]
+                            if literal.search(num) != None:
+                                lit_num = int(num)
+                                lit_b = str(bin(lit_num))
+                                lit = lit_b[2:len(lit_b)].zfill(8)
+                            else:
+                                if num[1] == "b":
+                                    lit = num[2:len(num)]
         if inst == "ADD":
             if datos[ndl] in instADDANDSUBORXOR:
                 if datos[ndl] == instADDANDSUBORXOR[0]:
@@ -275,48 +302,66 @@ if error != 1:
                 valores = datos[ndl].split(",")
                 if len(valores) == 2:
                     if literal.search(valores[1]) != None:
-                        lit_num = int(valores[1])
-                        lit_b = str(bin(lit_num))
-                        lit = lit_b[2:len(lit_b)].zfill(8)
                         if valores[0] == "A":
                             opcode = "0000110"
                         if valores[0] == "B":
                             opcode = "0000111"
-                    if valores[1][0]=="(":
-                        if valores[0] == "A":
-                            opcode = "0101100"
-                        if valores[0] == "B":
-                            opcode = "0101101"
-                        num_1 = valores[1].replace("(","")
-                        num = num_1.replace(")","")
-                        if num[0] == "#":
-                            lit_num = int(num[1:len(num)],base=16)
+                        if valores[1][0] == "#":
+                            lit_num = int(valores[1][1:len(valores[1])],base=16)
                             lit_b = str(bin(lit_num))
                             lit = lit_b[2:len(lit_b)].zfill(8)
+                            literal_c = True
                         else:
-                            if literal.search(num) != None:
-                                lit_num = int(num)
+                            if len(valores[1])==1:
+                                lit_num = int(valores[1])
+                                lit_b = str(bin(lit_num))
+                                lit = lit_b[2:len(lit_b)].zfill(8)
+                                literal_c = True
+                            else:
+                                if valores[1][1] == "b":
+                                    lit = valores[1][2:len(valores[1])]
+                                    literal_c = True
+                                else:
+                                    lit_num = int(valores[1])
+                                    lit_b = str(bin(lit_num))
+                                    lit = lit_b[2:len(lit_b)].zfill(8)
+                                    literal_c = True
+                    if literal_c == False:
+                        if valores[1][0]=="(":
+                            if valores[0] == "A":
+                                opcode = "0101100"
+                            if valores[0] == "B":
+                                opcode = "0101101"
+                            num_1 = valores[1].replace("(","")
+                            num = num_1.replace(")","")
+                            if num[0] == "#":
+                                lit_num = int(num[1:len(num)],base=16)
                                 lit_b = str(bin(lit_num))
                                 lit = lit_b[2:len(lit_b)].zfill(8)
                             else:
-                                if num[1] == "b":
-                                    lit = num[2:len(num)]
-                    else:
-                        opcode = "0101111"
-                        num_1 = valores[0].replace("(","")
-                        num = num_1.replace(")","")
-                        if num[0] == "#":
-                            lit_num = int(num[1:len(num)],base=16)
-                            lit_b = str(bin(lit_num))
-                            lit = lit_b[2:len(lit_b)].zfill(8)
+                                if literal.search(num) != None:
+                                    lit_num = int(num)
+                                    lit_b = str(bin(lit_num))
+                                    lit = lit_b[2:len(lit_b)].zfill(8)
+                                else:
+                                    if num[1] == "b":
+                                        lit = num[2:len(num)]
                         else:
-                            if literal.search(num) != None:
-                                lit_num = int(num)
+                            opcode = "0101111"
+                            num_1 = valores[0].replace("(","")
+                            num = num_1.replace(")","")
+                            if num[0] == "#":
+                                lit_num = int(num[1:len(num)],base=16)
                                 lit_b = str(bin(lit_num))
                                 lit = lit_b[2:len(lit_b)].zfill(8)
                             else:
-                                if num[1] == "b":
-                                    lit = num[2:len(num)]
+                                if literal.search(num) != None:
+                                    lit_num = int(num)
+                                    lit_b = str(bin(lit_num))
+                                    lit = lit_b[2:len(lit_b)].zfill(8)
+                                else:
+                                    if num[1] == "b":
+                                        lit = num[2:len(num)]
         if inst == "SUB":
             if datos[ndl] in instADDANDSUBORXOR:
                 if datos[ndl] == instADDANDSUBORXOR[0]:
@@ -330,48 +375,66 @@ if error != 1:
                 valores = datos[ndl].split(",")
                 if len(valores) == 2:
                     if literal.search(valores[1]) != None:
-                        lit_num = int(valores[1])
-                        lit_b = str(bin(lit_num))
-                        lit = lit_b[2:len(lit_b)].zfill(8)
                         if valores[0] == "A":
                             opcode = "0001010"
                         if valores[0] == "B":
                             opcode = "0001011"
-                    if valores[1][0]=="(":
-                        if valores[0] == "A":
-                            opcode = "0110000"
-                        if valores[0] == "B":
-                            opcode = "0110001"
-                        num_1 = valores[1].replace("(","")
-                        num = num_1.replace(")","")
-                        if num[0] == "#":
-                            lit_num = int(num[1:len(num)],base=16)
+                        if valores[1][0] == "#":
+                            lit_num = int(valores[1][1:len(valores[1])],base=16)
                             lit_b = str(bin(lit_num))
                             lit = lit_b[2:len(lit_b)].zfill(8)
+                            literal_c = True
                         else:
-                            if literal.search(num) != None:
-                                lit_num = int(num)
+                            if len(valores[1])==1:
+                                lit_num = int(valores[1])
+                                lit_b = str(bin(lit_num))
+                                lit = lit_b[2:len(lit_b)].zfill(8)
+                                literal_c = True
+                            else:
+                                if valores[1][1] == "b":
+                                    lit = valores[1][2:len(valores[1])]
+                                    literal_c = True
+                                else:
+                                    lit_num = int(valores[1])
+                                    lit_b = str(bin(lit_num))
+                                    lit = lit_b[2:len(lit_b)].zfill(8)
+                                    literal_c = True
+                    if literal_c == False:
+                        if valores[1][0]=="(":
+                            if valores[0] == "A":
+                                opcode = "0110000"
+                            if valores[0] == "B":
+                                opcode = "0110001"
+                            num_1 = valores[1].replace("(","")
+                            num = num_1.replace(")","")
+                            if num[0] == "#":
+                                lit_num = int(num[1:len(num)],base=16)
                                 lit_b = str(bin(lit_num))
                                 lit = lit_b[2:len(lit_b)].zfill(8)
                             else:
-                                if num[1] == "b":
-                                    lit = num[2:len(num)]
-                    else:
-                        opcode = "0110011"
-                        num_1 = valores[0].replace("(","")
-                        num = num_1.replace(")","")
-                        if num[0] == "#":
-                            lit_num = int(num[1:len(num)],base=16)
-                            lit_b = str(bin(lit_num))
-                            lit = lit_b[2:len(lit_b)].zfill(8)
+                                if literal.search(num) != None:
+                                    lit_num = int(num)
+                                    lit_b = str(bin(lit_num))
+                                    lit = lit_b[2:len(lit_b)].zfill(8)
+                                else:
+                                    if num[1] == "b":
+                                        lit = num[2:len(num)]
                         else:
-                            if literal.search(num) != None:
-                                lit_num = int(num)
+                            opcode = "0110011"
+                            num_1 = valores[0].replace("(","")
+                            num = num_1.replace(")","")
+                            if num[0] == "#":
+                                lit_num = int(num[1:len(num)],base=16)
                                 lit_b = str(bin(lit_num))
                                 lit = lit_b[2:len(lit_b)].zfill(8)
                             else:
-                                if num[1] == "b":
-                                    lit = num[2:len(num)]     
+                                if literal.search(num) != None:
+                                    lit_num = int(num)
+                                    lit_b = str(bin(lit_num))
+                                    lit = lit_b[2:len(lit_b)].zfill(8)
+                                else:
+                                    if num[1] == "b":
+                                        lit = num[2:len(num)]     
         if inst == "AND":
             if datos[ndl] in instADDANDSUBORXOR:
                 if datos[ndl] == instADDANDSUBORXOR[0]:
@@ -385,48 +448,66 @@ if error != 1:
                 valores = datos[ndl].split(",")
                 if len(valores) == 2:
                     if literal.search(valores[1]) != None:
-                        lit_num = int(valores[1])
-                        lit_b = str(bin(lit_num))
-                        lit = lit_b[2:len(lit_b)].zfill(8)
                         if valores[0] == "A":
                             opcode = "0001110"
                         if valores[0] == "B":
                             opcode = "0001111"
-                    if valores[1][0]=="(":
-                        if valores[0] == "A":
-                            opcode = "0110100"
-                        if valores[0] == "B":
-                            opcode = "0110101"
-                        num_1 = valores[1].replace("(","")
-                        num = num_1.replace(")","")
-                        if num[0] == "#":
-                            lit_num = int(num[1:len(num)],base=16)
+                        if valores[1][0] == "#":
+                            lit_num = int(valores[1][1:len(valores[1])],base=16)
                             lit_b = str(bin(lit_num))
                             lit = lit_b[2:len(lit_b)].zfill(8)
+                            literal_c = True
                         else:
-                            if literal.search(num) != None:
-                                lit_num = int(num)
+                            if len(valores[1])==1:
+                                lit_num = int(valores[1])
+                                lit_b = str(bin(lit_num))
+                                lit = lit_b[2:len(lit_b)].zfill(8)
+                                literal_c = True
+                            else:
+                                if valores[1][1] == "b":
+                                    lit = valores[1][2:len(valores[1])]
+                                    literal_c = True
+                                else:
+                                    lit_num = int(valores[1])
+                                    lit_b = str(bin(lit_num))
+                                    lit = lit_b[2:len(lit_b)].zfill(8)
+                                    literal_c = True
+                    if literal_c == False:
+                        if valores[1][0]=="(":
+                            if valores[0] == "A":
+                                opcode = "0110100"
+                            if valores[0] == "B":
+                                opcode = "0110101"
+                            num_1 = valores[1].replace("(","")
+                            num = num_1.replace(")","")
+                            if num[0] == "#":
+                                lit_num = int(num[1:len(num)],base=16)
                                 lit_b = str(bin(lit_num))
                                 lit = lit_b[2:len(lit_b)].zfill(8)
                             else:
-                                if num[1] == "b":
-                                    lit = num[2:len(num)]
-                    else:
-                        opcode = "0110111"
-                        num_1 = valores[0].replace("(","")
-                        num = num_1.replace(")","")
-                        if num[0] == "#":
-                            lit_num = int(num[1:len(num)],base=16)
-                            lit_b = str(bin(lit_num))
-                            lit = lit_b[2:len(lit_b)].zfill(8)
+                                if literal.search(num) != None:
+                                    lit_num = int(num)
+                                    lit_b = str(bin(lit_num))
+                                    lit = lit_b[2:len(lit_b)].zfill(8)
+                                else:
+                                    if num[1] == "b":
+                                        lit = num[2:len(num)]
                         else:
-                            if literal.search(num) != None:
-                                lit_num = int(num)
+                            opcode = "0110111"
+                            num_1 = valores[0].replace("(","")
+                            num = num_1.replace(")","")
+                            if num[0] == "#":
+                                lit_num = int(num[1:len(num)],base=16)
                                 lit_b = str(bin(lit_num))
                                 lit = lit_b[2:len(lit_b)].zfill(8)
                             else:
-                                if num[1] == "b":
-                                    lit = num[2:len(num)]  
+                                if literal.search(num) != None:
+                                    lit_num = int(num)
+                                    lit_b = str(bin(lit_num))
+                                    lit = lit_b[2:len(lit_b)].zfill(8)
+                                else:
+                                    if num[1] == "b":
+                                        lit = num[2:len(num)]  
         if inst == "OR":
             if datos[ndl] in instADDANDSUBORXOR:
                 if datos[ndl] == instADDANDSUBORXOR[0]:
@@ -440,48 +521,66 @@ if error != 1:
                 valores = datos[ndl].split(",")
                 if len(valores) == 2:
                     if literal.search(valores[1]) != None:
-                        lit_num = int(valores[1])
-                        lit_b = str(bin(lit_num))
-                        lit = lit_b[2:len(lit_b)].zfill(8)
                         if valores[0] == "A":
                             opcode = "0010010"
                         if valores[0] == "B":
                             opcode = "0010011"
-                    if valores[1][0]=="(":
-                        if valores[0] == "A":
-                            opcode = "0111000"
-                        if valores[0] == "B":
-                            opcode = "0111001"
-                        num_1 = valores[1].replace("(","")
-                        num = num_1.replace(")","")
-                        if num[0] == "#":
-                            lit_num = int(num[1:len(num)],base=16)
+                        if valores[1][0] == "#":
+                            lit_num = int(valores[1][1:len(valores[1])],base=16)
                             lit_b = str(bin(lit_num))
                             lit = lit_b[2:len(lit_b)].zfill(8)
+                            literal_c = True
                         else:
-                            if literal.search(num) != None:
-                                lit_num = int(num)
+                            if len(valores[1])==1:
+                                lit_num = int(valores[1])
+                                lit_b = str(bin(lit_num))
+                                lit = lit_b[2:len(lit_b)].zfill(8)
+                                literal_c = True
+                            else:
+                                if valores[1][1] == "b":
+                                    lit = valores[1][2:len(valores[1])]
+                                    literal_c = True
+                                else:
+                                    lit_num = int(valores[1])
+                                    lit_b = str(bin(lit_num))
+                                    lit = lit_b[2:len(lit_b)].zfill(8)
+                                    literal_c = True
+                    if literal_c == False:
+                        if valores[1][0]=="(":
+                            if valores[0] == "A":
+                                opcode = "0111000"
+                            if valores[0] == "B":
+                                opcode = "0111001"
+                            num_1 = valores[1].replace("(","")
+                            num = num_1.replace(")","")
+                            if num[0] == "#":
+                                lit_num = int(num[1:len(num)],base=16)
                                 lit_b = str(bin(lit_num))
                                 lit = lit_b[2:len(lit_b)].zfill(8)
                             else:
-                                if num[1] == "b":
-                                    lit = num[2:len(num)]
-                    else:
-                        opcode = "0111011"
-                        num_1 = valores[0].replace("(","")
-                        num = num_1.replace(")","")
-                        if num[0] == "#":
-                            lit_num = int(num[1:len(num)],base=16)
-                            lit_b = str(bin(lit_num))
-                            lit = lit_b[2:len(lit_b)].zfill(8)
+                                if literal.search(num) != None:
+                                    lit_num = int(num)
+                                    lit_b = str(bin(lit_num))
+                                    lit = lit_b[2:len(lit_b)].zfill(8)
+                                else:
+                                    if num[1] == "b":
+                                        lit = num[2:len(num)]
                         else:
-                            if literal.search(num) != None:
-                                lit_num = int(num)
+                            opcode = "0111011"
+                            num_1 = valores[0].replace("(","")
+                            num = num_1.replace(")","")
+                            if num[0] == "#":
+                                lit_num = int(num[1:len(num)],base=16)
                                 lit_b = str(bin(lit_num))
                                 lit = lit_b[2:len(lit_b)].zfill(8)
                             else:
-                                if num[1] == "b":
-                                    lit = num[2:len(num)]  
+                                if literal.search(num) != None:
+                                    lit_num = int(num)
+                                    lit_b = str(bin(lit_num))
+                                    lit = lit_b[2:len(lit_b)].zfill(8)
+                                else:
+                                    if num[1] == "b":
+                                        lit = num[2:len(num)]  
         if inst == "XOR":
             if datos[ndl] in instADDANDSUBORXOR:
                 if datos[ndl] == instADDANDSUBORXOR[0]:
@@ -495,48 +594,66 @@ if error != 1:
                 valores = datos[ndl].split(",")
                 if len(valores) == 2:
                     if literal.search(valores[1]) != None:
-                        lit_num = int(valores[1])
-                        lit_b = str(bin(lit_num))
-                        lit = lit_b[2:len(lit_b)].zfill(8)
                         if valores[0] == "A":
                             opcode = "0011010"
                         if valores[0] == "B":
                             opcode = "0011011"
-                    if valores[1][0]=="(":
-                        if valores[0] == "A":
-                            opcode = "0111111"
-                        if valores[0] == "B":
-                            opcode = "1000000"
-                        num_1 = valores[1].replace("(","")
-                        num = num_1.replace(")","")
-                        if num[0] == "#":
-                            lit_num = int(num[1:len(num)],base=16)
+                        if valores[1][0] == "#":
+                            lit_num = int(valores[1][1:len(valores[1])],base=16)
                             lit_b = str(bin(lit_num))
                             lit = lit_b[2:len(lit_b)].zfill(8)
+                            literal_c = True
                         else:
-                            if literal.search(num) != None:
-                                lit_num = int(num)
+                            if len(valores[1])==1:
+                                lit_num = int(valores[1])
+                                lit_b = str(bin(lit_num))
+                                lit = lit_b[2:len(lit_b)].zfill(8)
+                                literal_c = True
+                            else:
+                                if valores[1][1] == "b":
+                                    lit = valores[1][2:len(valores[1])]
+                                    literal_c = True
+                                else:
+                                    lit_num = int(valores[1])
+                                    lit_b = str(bin(lit_num))
+                                    lit = lit_b[2:len(lit_b)].zfill(8)
+                                    literal_c = True
+                    if literal_c == False:
+                        if valores[1][0]=="(":
+                            if valores[0] == "A":
+                                opcode = "0111111"
+                            if valores[0] == "B":
+                                opcode = "1000000"
+                            num_1 = valores[1].replace("(","")
+                            num = num_1.replace(")","")
+                            if num[0] == "#":
+                                lit_num = int(num[1:len(num)],base=16)
                                 lit_b = str(bin(lit_num))
                                 lit = lit_b[2:len(lit_b)].zfill(8)
                             else:
-                                if num[1] == "b":
-                                    lit = num[2:len(num)]
-                    else:
-                        opcode = "1000010"
-                        num_1 = valores[0].replace("(","")
-                        num = num_1.replace(")","")
-                        if num[0] == "#":
-                            lit_num = int(num[1:len(num)],base=16)
-                            lit_b = str(bin(lit_num))
-                            lit = lit_b[2:len(lit_b)].zfill(8)
+                                if literal.search(num) != None:
+                                    lit_num = int(num)
+                                    lit_b = str(bin(lit_num))
+                                    lit = lit_b[2:len(lit_b)].zfill(8)
+                                else:
+                                    if num[1] == "b":
+                                        lit = num[2:len(num)]
                         else:
-                            if literal.search(num) != None:
-                                lit_num = int(num)
+                            opcode = "1000010"
+                            num_1 = valores[0].replace("(","")
+                            num = num_1.replace(")","")
+                            if num[0] == "#":
+                                lit_num = int(num[1:len(num)],base=16)
                                 lit_b = str(bin(lit_num))
                                 lit = lit_b[2:len(lit_b)].zfill(8)
                             else:
-                                if num[1] == "b":
-                                    lit = num[2:len(num)]  
+                                if literal.search(num) != None:
+                                    lit_num = int(num)
+                                    lit_b = str(bin(lit_num))
+                                    lit = lit_b[2:len(lit_b)].zfill(8)
+                                else:
+                                    if num[1] == "b":
+                                        lit = num[2:len(num)] 
         if inst == "NOT":
             if datos[ndl] in instNOTSHLSHR:
                 # instNOTSHLSHR = ["A,B","A,A","B,A","B,B"]
@@ -548,15 +665,16 @@ if error != 1:
                     opcode = "0010110"
                 if datos[ndl] == instNOTSHLSHR[3]:
                     opcode = "0010111"
+                lit = "00000000"
             else:
                 valores = datos[ndl].split(",")
                 if len(valores) == 2:
                     if valores[0][0]=="(":
-                        if valores[0] == "A":
+                        if valores[1] == "A":
                             opcode = "0111100"
-                        if valores[0] == "B":
+                        if valores[1] == "B":
                             opcode = "0111101"
-                        num_1 = valores[1].replace("(","")
+                        num_1 = valores[0].replace("(","")
                         num = num_1.replace(")","")
                         if num[0] == "#":
                             lit_num = int(num[1:len(num)],base=16)
@@ -597,15 +715,16 @@ if error != 1:
                     opcode = "0011110"
                 if datos[ndl] == instNOTSHLSHR[3]:
                     opcode = "0011111"
+                lit = "00000000"
             else:
                 valores = datos[ndl].split(",")
                 if len(valores) == 2:
                     if valores[0][0]=="(":
-                        if valores[0] == "A":
+                        if valores[1] == "A":
                             opcode = "1000011"
-                        if valores[0] == "B":
+                        if valores[1] == "B":
                             opcode = "1000100"
-                        num_1 = valores[1].replace("(","")
+                        num_1 = valores[0].replace("(","")
                         num = num_1.replace(")","")
                         if num[0] == "#":
                             lit_num = int(num[1:len(num)],base=16)
@@ -645,15 +764,16 @@ if error != 1:
                     opcode = "0100010"
                 if datos[ndl] == instNOTSHLSHR[3]:
                     opcode = "0100011"
+                lit = "00000000"
             else:
                 valores = datos[ndl].split(",")
                 if len(valores) == 2:
                     if valores[0][0]=="(":
-                        if valores[0] == "A":
+                        if valores[1] == "A":
                             opcode = "1000110"
-                        if valores[0] == "B":
+                        if valores[1] == "B":
                             opcode = "1000111"
-                        num_1 = valores[1].replace("(","")
+                        num_1 = valores[0].replace("(","")
                         num = num_1.replace(")","")
                         if num[0] == "#":
                             lit_num = int(num[1:len(num)],base=16)
@@ -683,10 +803,55 @@ if error != 1:
                             else:
                                 if num[1] == "b":
                                     lit = num[2:len(num)]            
-
+        if inst == "INC":
+            if datos[ndl]=="B":
+                opcode = "0100100"
+                lit = "00000000"
+            if datos[ndl][0]=="(":
+                if datos[ndl][1]=="B":
+                    opcode = "1001010"
+                    lit = "00000000"
+                else:
+                    opcode = "1001001"
+                    num_1 = datos[ndl].replace("(","")
+                    num = num_1.replace(")","")
+                    if num[0] == "#":
+                        lit_num = int(num[1:len(num)],base=16)
+                        lit_b = str(bin(lit_num))
+                        lit = lit_b[2:len(lit_b)].zfill(8)
+                    else:
+                        if literal.search(num) != None:
+                            lit_num = int(num)
+                            lit_b = str(bin(lit_num))
+                            lit = lit_b[2:len(lit_b)].zfill(8)
+                        else:
+                            if num[1] == "b":
+                                lit = num[2:len(num)]
+        if inst == "RST":
+            if datos[ndl] == "(B)":
+                opcode = "1001100"
+                lit = "00000000"
+            else:
+                opcode = "1001011"
+                num_1 = datos[ndl].replace("(","")
+                num = num_1.replace(")","")
+                if num[0] == "#":
+                    lit_num = int(num[1:len(num)],base=16)
+                    lit_b = str(bin(lit_num))
+                    lit = lit_b[2:len(lit_b)].zfill(8)
+                else:
+                    if literal.search(num) != None:
+                        lit_num = int(num)
+                        lit_b = str(bin(lit_num))
+                        lit = lit_b[2:len(lit_b)].zfill(8)
+                    else:
+                        if num[1] == "b":
+                            lit = num[2:len(num)]
+        #Las de salto
         if inst == 0:
             pass
-        traduccion.write(f'{instrucciones[ndl]} {opcode}{lit}\n')                     
+        traduccion.write(f'{opcode}{lit}\n')
+        literal_c = False                  
         ndl+=1
 
 
