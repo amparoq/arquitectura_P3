@@ -15,8 +15,7 @@ while i<(len(jumps)-1):
 
 literal = re.compile('[0-9]+$')
 
-codigo = open("p3_1-correccion1.ass",'r')
-traduccion = open("traduccion.out",'w')
+codigo = open("p3_1-correccion2.ass",'r')
 
 p = codigo.read()
 lineas = p.split("\n")
@@ -214,6 +213,7 @@ for inst in instrucciones:
 
 ndl = 0
 if error != 1:
+    traduccion = open("traduccion.out",'w')
     opcode=""
     lit= ""
     for inst in instrucciones:
