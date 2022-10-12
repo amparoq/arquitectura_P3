@@ -5,6 +5,13 @@ instMOV = ["A,B","B,A","A,(B)","B,(B)","(B),A"] #instrucciones que se pueden, la
 instADDANDSUBORXOR = ["A,B","B,A","A,(B)"]
 instNOTSHLSHR = ["A,A","A,B","B,A","B,B"]
 jumps = ["JMP","JEQ","JNE","JGT","JLT","JGE","JLE","JCR","JOV","CALL"]
+jumps_opcode=[]
+opcode_n = 83
+i = 0
+while i<(len(jumps)-1):
+    opc_str = str(bin(opcode_n))
+    jumps_opcode.append(opc_str[2:len(opc_str)])
+    i+=1
 
 literal = re.compile('[0-9]+$')
 
@@ -847,16 +854,88 @@ if error != 1:
                     else:
                         if num[1] == "b":
                             lit = num[2:len(num)]
-        #Las de salto
+        if inst == "CMP":
+            if datos[ndl] == "A,B":
+                lit == "00000000"
+                opcode = "1001101"
+            if datos[ndl] == "A,(B)":
+                lit == "00000000"
+                opcode = "1010010"
+            valores = datos[ndl].split(",")
+            if literal.search(valores[1]) != None:
+                if valores[0] == "A":
+                    opcode = "1001110"
+                if valores[0] == "B":
+                    opcode = "1001111"
+                if valores[1][0] == "#":
+                    lit_num = int(valores[1][1:len(valores[1])],base=16)
+                    lit_b = str(bin(lit_num))
+                    lit = lit_b[2:len(lit_b)].zfill(8)
+                    literal_c = True
+                else:
+                    if len(valores[1])==1:
+                        lit_num = int(valores[1])
+                        lit_b = str(bin(lit_num))
+                        lit = lit_b[2:len(lit_b)].zfill(8)
+                        literal_c = True
+                    else:
+                        if valores[1][1] == "b":
+                            lit = valores[1][2:len(valores[1])]
+                            literal_c = True
+                        else:
+                            lit_num = int(valores[1])
+                            lit_b = str(bin(lit_num))
+                            lit = lit_b[2:len(lit_b)].zfill(8)
+                            literal_c = True
+                if literal_c == False:
+                    if valores[1][0]=="(":
+                        if valores[0] == "A":
+                            opcode = "1010000"
+                        if valores[0] == "B":
+                            opcode = "1010001"
+                        num_1 = valores[1].replace("(","")
+                        num = num_1.replace(")","")
+                        if num[0] == "#":
+                            lit_num = int(num[1:len(num)],base=16)
+                            lit_b = str(bin(lit_num))
+                            lit = lit_b[2:len(lit_b)].zfill(8)
+                        else:
+                            if literal.search(num) != None:
+                                lit_num = int(num)
+                                lit_b = str(bin(lit_num))
+                                lit = lit_b[2:len(lit_b)].zfill(8)
+                            else:
+                                if num[1] == "b":
+                                    lit = num[2:len(num)]
+        if inst in jumps:
+            ind = jumps.index(inst)
+            opcode = jumps_opcode[ind]
+            if literal.search(datos[ndl]) != None:
+                    if datos[ndl][0] == "#":
+                        lit_num = int(datos[ndl][1:len(datos[ndl])],base=16)
+                        lit_b = str(bin(lit_num))
+                        lit = lit_b[2:len(lit_b)].zfill(8)
+                        literal_c = True
+                    else:
+                        if len(datos[ndl])==1:
+                            lit_num = int(datos[ndl])
+                            lit_b = str(bin(lit_num))
+                            lit = lit_b[2:len(lit_b)].zfill(8)
+                            literal_c = True
+                        else:
+                            if datos[ndl][1] == "b":
+                                lit = datos[ndl][2:len(datos[ndl])]
+                                literal_c = True
+                            else:
+                                lit_num = int(datos[ndl])
+                                lit_b = str(bin(lit_num))
+                                lit = lit_b[2:len(lit_b)].zfill(8)
+                                literal_c = True
         if inst == 0:
             pass
         traduccion.write(f'{opcode}{lit}\n')
         literal_c = False                  
         ndl+=1
-
-
-
-
 if error == 0:
     print("Todas las instrucciones existen")
 else:
