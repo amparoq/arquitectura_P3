@@ -15,7 +15,7 @@ while i<(len(jumps)-1):
 
 literal = re.compile('[0-9]+$')
 
-codigo = open("p3_1-correccion2.ass",'r')
+codigo = open("p3_1-correccion1.ass",'r')
 
 p = codigo.read()
 lineas = p.split("\n")
@@ -214,7 +214,7 @@ for inst in instrucciones:
 ndl = 0
 if error != 1:
     traduccion = open("traduccion.out",'w')
-    opcode=""
+    opcode = ""
     lit= ""
     for inst in instrucciones:
         if inst == "MOV":
@@ -931,13 +931,14 @@ if error != 1:
                                 lit_b = str(bin(lit_num))
                                 lit = lit_b[2:len(lit_b)].zfill(8)
                                 literal_c = True
-        if inst == 0:
-            pass
-        traduccion.write(f'{opcode}{lit}\n')
-        literal_c = False                  
+        if inst != 0 and inst != "" :
+            traduccion.write(f'{opcode}{lit}\n')
+            literal_c = False                  
         ndl+=1
 if error == 0:
     print("Todas las instrucciones existen")
 else:
     print("El código finalizó con errores")
+
+print(instrucciones)
 
