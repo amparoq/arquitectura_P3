@@ -19,7 +19,7 @@ literal_dec = re.compile('^[0-9]+$')
 
 e_lit = False
 
-codigo = open("p3_2-correccion2.ass",'r')
+codigo = open("p3_2-correccion1.ass",'r')
 
 p = codigo.read()
 lineas = p.split("\n")
@@ -289,6 +289,8 @@ for inst in instrucciones:
                     error = 1
             if e_lit == False:
                 lit_p = "00000000"
+        else:
+            lit_p = "00000000"
     else:
         pass
     e_lit = False
@@ -315,17 +317,24 @@ if error != 1:
                 if datos[ndl] == instMOV[4]:
                     opcode = "0101011"
             else:
-                valores = datos[ndl].split(",")
+                valores = datos[ndl].replace("(","").replace(")","").split(",")
+                valore = datos[ndl].split(",")
                 if literal.search(valores[1]) != None and valores[1]!= "A" and valores[1]!= "B":
                     if valores[0] == "A":
                         opcode = "0000010"
                     if valores[0] == "B":
                         opcode = "0000011"
-                    if valores[1][0]=="(":
+                    if valore[1][0]=="(":
                         if valores[0] == "A":
                             opcode = "0100101"
                         if valores[0] == "B":
                             opcode = "0100110"
+                if literal.search(valores[0]) != None and valores[0]!= "A" and valores[0]!= "B":
+                    if valore[0][0]=="(":
+                        if valores[1] == "A":
+                            opcode = "0100111"
+                        if valores[1] == "B":
+                            opcode = "0101000"
         if inst == "ADD":
             if datos[ndl] in instADDANDSUBORXOR:
                 if datos[ndl] == instADDANDSUBORXOR[0]:
@@ -335,14 +344,15 @@ if error != 1:
                 if datos[ndl] == instADDANDSUBORXOR[2]:
                     opcode = "0101110"
             else:
-                valores = datos[ndl].split(",")
+                valores = datos[ndl].replace("(","").replace(")","").split(",")
+                valore = datos[ndl].split(",")
                 if len(valores) == 2:
                     if literal.search(valores[1]) != None and valores[1]!= "A" and valores[1]!= "B":
                         if valores[0] == "A":
                             opcode = "0000110"
                         if valores[0] == "B":
                             opcode = "0000111"
-                        if valores[1][0]=="(":
+                        if valore[1][0]=="(":
                             if valores[0] == "A":
                                 opcode = "0101100"
                             if valores[0] == "B":
@@ -359,14 +369,15 @@ if error != 1:
                     opcode = "0110010"
                 lit = "00000000"
             else:
-                valores = datos[ndl].split(",")
+                valores = datos[ndl].replace("(","").replace(")","").split(",")
+                valore = datos[ndl].split(",")
                 if len(valores) == 2:
                     if literal.search(valores[1]) != None and valores[1]!= "A" and valores[1]!= "B":
                         if valores[0] == "A":
                             opcode = "0001010"
                         if valores[0] == "B":
                             opcode = "0001011"
-                        if valores[1][0]=="(":
+                        if valore[1][0]=="(":
                             if valores[0] == "A":
                                 opcode = "0110000"
                             if valores[0] == "B":
@@ -382,14 +393,15 @@ if error != 1:
                 if datos[ndl] == instADDANDSUBORXOR[2]:
                     opcode = "0110110"
             else:
-                valores = datos[ndl].split(",")
+                valores = datos[ndl].replace("(","").replace(")","").split(",")
+                valore = datos[ndl].split(",")
                 if len(valores) == 2:
                     if literal.search(valores[1]) != None and valores[1]!= "A" and valores[1]!= "B":
                         if valores[0] == "A":
                             opcode = "0001110"
                         if valores[0] == "B":
                             opcode = "0001111"
-                        if valores[1][0]=="(":
+                        if valore[1][0]=="(":
                             if valores[0] == "A":
                                 opcode = "0110100"
                             if valores[0] == "B":
@@ -405,14 +417,15 @@ if error != 1:
                 if datos[ndl] == instADDANDSUBORXOR[2]:
                     opcode = "0111010"
             else:
-                valores = datos[ndl].split(",")
+                valores = datos[ndl].replace("(","").replace(")","").split(",")
+                valore = datos[ndl].split(",")
                 if len(valores) == 2:
                     if literal.search(valores[1]) != None and valores[1]!= "A" and valores[1]!= "B":
                         if valores[0] == "A":
                             opcode = "0010010"
                         if valores[0] == "B":
                             opcode = "0010011"
-                        if valores[1][0]=="(":
+                        if valore[1][0]=="(":
                             if valores[0] == "A":
                                 opcode = "0111000"
                             if valores[0] == "B":
@@ -428,14 +441,15 @@ if error != 1:
                 if datos[ndl] == instADDANDSUBORXOR[2]:
                     opcode = "1000001"
             else:
-                valores = datos[ndl].split(",")
+                valores = datos[ndl].replace("(","").replace(")","").split(",")
+                valore = datos[ndl].split(",")
                 if len(valores) == 2:
                     if literal.search(valores[1]) != None and valores[1]!= "A" and valores[1]!= "B":
                         if valores[0] == "A":
                             opcode = "0011010"
                         if valores[0] == "B":
                             opcode = "0011011"
-                        if valores[1][0]=="(":
+                        if valore[1][0]=="(":
                             if valores[0] == "A":
                                 opcode = "0111111"
                             if valores[0] == "B":
@@ -454,9 +468,10 @@ if error != 1:
                 if datos[ndl] == instNOTSHLSHR[3]:
                     opcode = "0010111"
             else:
-                valores = datos[ndl].split(",")
+                valores = datos[ndl].replace("(","").replace(")","").split(",")
+                valore = datos[ndl].split(",")
                 if len(valores) == 2:
-                    if valores[0][0]=="(":
+                    if valore[0][0]=="(":
                         if valores[1] == "A":
                             opcode = "0111100"
                         if valores[1] == "B":
@@ -475,9 +490,10 @@ if error != 1:
                 if datos[ndl] == instNOTSHLSHR[3]:
                     opcode = "0011111"
             else:
-                valores = datos[ndl].split(",")
+                valores = datos[ndl].replace("(","").replace(")","").split(",")
+                valore = datos[ndl].split(",")
                 if len(valores) == 2:
-                    if valores[0][0]=="(":
+                    if valore[0][0]=="(":
                         if valores[1] == "A":
                             opcode = "1000011"
                         if valores[1] == "B":
@@ -495,7 +511,8 @@ if error != 1:
                 if datos[ndl] == instNOTSHLSHR[3]:
                     opcode = "0100011"
             else:
-                valores = datos[ndl].split(",")
+                valores = datos[ndl].replace("(","").replace(")","").split(",")
+                valore = datos[ndl].split(",")
                 if len(valores) == 2:
                     if valores[0][0]=="(":
                         if valores[1] == "A":
@@ -522,13 +539,14 @@ if error != 1:
                 opcode = "1001101"
             if datos[ndl] == "A,(B)":
                 opcode = "1010010"
-            valores = datos[ndl].split(",")
+            valores = datos[ndl].replace("(","").replace(")","").split(",")
+            valore = datos[ndl].split(",")
             if literal.search(valores[1]) != None and valores[1]!= "A" and valores[1]!= "B":
                 if valores[0] == "A":
                     opcode = "1001110"
                 if valores[0] == "B":
                     opcode = "1001111"
-                if valores[1][0]=="(":
+                if valore[1][0]=="(":
                     if valores[0] == "A":
                         opcode = "1010000"
                     if valores[0] == "B":
