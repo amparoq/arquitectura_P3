@@ -18,15 +18,21 @@ literal = re.compile('[0-9a-fA-F]+$')
 literal_dec = re.compile('^[0-9]+$')
 
 e_lit = False
+data_on = False
+registros = {} #para guardar lo que está en data
 
-codigo = open("p3_2-correccion1.ass",'r')
+codigo = open("ej_data.ass",'r')
 
 p = codigo.read()
 lineas = p.split("\n")
+if lineas[0] == "DATA:":
+    data_on = True
 
 instrucciones = []
 datos = []
 etiquetas = []
+endata = False
+encode = False
 for linea in lineas:
     l = 0
     uvpl = 0
@@ -35,18 +41,47 @@ for linea in lineas:
     prim_seg = lin[0].split(" ")
     if len(lin) != 0:
         if len(lin) == 1:
+            if prim_seg[0] == "CODE:":
+                encode = True
+                endata = False
+            if prim_seg[0] == "DATA:":
+                endata = True
             if len(prim_seg) == 2:
-                instrucciones.append(prim_seg[0])
-                datos.append(prim_seg[1])
+                if encode == True:
+                    instrucciones.append(prim_seg[0])
+                    datos.append(prim_seg[1])
+                if endata == True:
+                    if literal.search(prim_seg[1]) != None:
+                        if prim_seg[1][0] == "#":
+                            num_bi = bin(int(prim_seg[1][1:]))[2:]
+                        else:
+                            if prim_seg[1][0] == "b":
+                                num_bi = prim_seg[1:]
+                            else:
+                                if prim_seg[1][0] == "-":
+                                    if literal_dec.search(prim_seg[1][1:]) != None:
+                                        num_bi_p = bin(int(prim_seg[1][1:]))[2:]
+                                        if len(num_bi_p)>8:
+                                            print(f'El registro {prim_seg[0]} está asignado a una dirección mayor a 8 bits') #ver si esto se puede
+                                        else:
+                                            num_bi = bin(int(prim_seg) & 0b11111111)[2:]
+                                else:
+                                    num_bi= bin(int(prim_seg[1]))[2:]
+                        if len(num_bi)>8:
+                            print(f'El registro {prim_seg[0]} está asignado a una dirección mayor a 8 bits') #ver si esto se puede
+                        else:
+                            registros[prim_seg[0]] = num_bi.zfill(8)
             else:
-                if lin[0] != "CODE:":
-                    etiquetas.append(linea)
-                    instrucciones.append(0)
-                    datos.append(0)
+                if encode == True:
+                    if lin[0] != "CODE:":
+                        etiquetas.append(linea.strip())
+                        instrucciones.append(0)
+                        datos.append(0)
         else:
-            instrucciones.append(prim_seg[0])
-            dat = prim_seg[1]+","+lin[1].replace(" ","")
-            datos.append(dat)
+            if encode == True:
+                instrucciones.append(prim_seg[0])
+                dat = prim_seg[1]+","+lin[1].replace(" ","")
+                datos.append(dat)
 ndl = 0
 error = 0
 
@@ -58,6 +93,12 @@ for e in etiquetas:
 
 literales = []
 #correccion de errores
+
+print(instrucciones)
+print(datos)
+print(registros)
+print(etiquetas)
+
 for inst in instrucciones:
     if inst != 0:
         if inst not in inst_e:
@@ -299,6 +340,7 @@ for inst in instrucciones:
 
 ndl = 0
 #traducción
+
 if error != 1:
     traduccion = open("traduccion.out",'w')
     opcode = ""
@@ -562,7 +604,5 @@ if error == 0:
 else:
     print("El código finalizó con errores")
 
-#errores: 
-#1) en los errores, revisar que los que no inician con hashtag y tienen letras estan mal
-#2) numeros de bits (max 8)
-#3) lo de los numeros negativos
+#Que falta hacer:
+#Explicar por qué se generó cada error (en el print poner cual fue el error)
