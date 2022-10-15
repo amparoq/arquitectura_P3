@@ -33,6 +33,8 @@ datos = []
 etiquetas = []
 endata = False
 encode = False
+reg_posi = []
+ndl = 0
 for linea in lineas:
     l = 0
     uvpl = 0
@@ -41,36 +43,37 @@ for linea in lineas:
     prim_seg = lin[0].split(" ")
     if len(lin) != 0:
         if len(lin) == 1:
-            if prim_seg[0] == "CODE:":
+            if data_on == True:
+                if prim_seg[0] == "CODE:":
+                    encode = True
+                    endata = False
+                if prim_seg[0] == "DATA:":
+                    encode = False
+                    endata = True
+            else:
                 encode = True
-                endata = False
-            if prim_seg[0] == "DATA:":
-                endata = True
             if len(prim_seg) == 2:
                 if encode == True:
                     instrucciones.append(prim_seg[0])
                     datos.append(prim_seg[1])
                 if endata == True:
-                    if literal.search(prim_seg[1]) != None:
-                        if prim_seg[1][0] == "#":
-                            num_bi = bin(int(prim_seg[1][1:]))[2:]
-                        else:
-                            if prim_seg[1][0] == "b":
-                                num_bi = prim_seg[1:]
+                    if prim_seg[0] != "DATA:":
+                        if literal.search(prim_seg[1]) != None:
+                            if prim_seg[1][0] == "#":
+                                num_bi = bin(int(prim_seg[1][1:]))[2:]
                             else:
-                                if prim_seg[1][0] == "-":
-                                    if literal_dec.search(prim_seg[1][1:]) != None:
-                                        num_bi_p = bin(int(prim_seg[1][1:]))[2:]
-                                        if len(num_bi_p)>8:
-                                            print(f'El registro {prim_seg[0]} está asignado a una dirección mayor a 8 bits') #ver si esto se puede
-                                        else:
-                                            num_bi = bin(int(prim_seg) & 0b11111111)[2:]
+                                if prim_seg[1][0] == "b":
+                                    num_bi = prim_seg[1:]
                                 else:
-                                    num_bi= bin(int(prim_seg[1]))[2:]
-                        if len(num_bi)>8:
-                            print(f'El registro {prim_seg[0]} está asignado a una dirección mayor a 8 bits') #ver si esto se puede
-                        else:
-                            registros[prim_seg[0]] = num_bi.zfill(8)
+                                    if prim_seg[1][0] == "-":
+                                        print(f'El registro {prim_seg[0]} está asignado a una dirección negativa') #ver si esto se puede
+                                    else:
+                                        num_bi= bin(int(prim_seg[1]))[2:]
+                            if len(num_bi)>8:
+                                print(f'El registro {prim_seg[0]} está asignado a una dirección mayor a 8 bits') #ver si esto se puede
+                            else:
+                                registros[prim_seg[0]] = num_bi.zfill(8)
+                        reg_posi.append(ndl)
             else:
                 if encode == True:
                     if lin[0] != "CODE:":
@@ -82,6 +85,7 @@ for linea in lineas:
                 instrucciones.append(prim_seg[0])
                 dat = prim_seg[1]+","+lin[1].replace(" ","")
                 datos.append(dat)
+        ndl+=1
 ndl = 0
 error = 0
 
@@ -92,12 +96,8 @@ for e in etiquetas:
             error = 1
 
 literales = []
-#correccion de errores
 
-print(instrucciones)
-print(datos)
-print(registros)
-print(etiquetas)
+#correccion de errores
 
 for inst in instrucciones:
     if inst != 0:
@@ -264,78 +264,89 @@ for inst in instrucciones:
         #handling de los numeros
         #esto debe cambiar cuando hayan etiquetas
         if datos[ndl] != 0 and datos[ndl] not in instMOV and datos[ndl] not in instADDANDSUBORXOR and datos[ndl] not in instNOTSHLSHR:
-            v = datos[ndl].split(",")
-            drr = v[0].replace("(","")
-            dr1 = drr.replace(")","")
-            if len(v)>1:
-                drr = v[1].replace("(","")
-                dr2 = drr.replace(")","")
-                if dr2[0] != "#" and dr2[0] != "b" and dr2[0] != "-" and literal_dec.search(dr2[0]) == None and (dr2 != "A" and dr2 != "B"):
-                    print(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
-                    error = 1
-                else:
-                    e_lit = True
-                    if dr2[0] == "#":
-                        lit_num = int(dr2[1:],base=16)
-                        lit_b = str(bin(lit_num))
-                        lit_p = lit_b[2:len(lit_b)]
-                    if dr2[0] == "b":
-                        lit_p = dr2[1:]
-                    if dr2[0] == "-":
-                        int_sin = dr2.replace("-","")
-                        if literal_dec.search(int_sin) == None:
-                            print(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
-                            error = 1
-                        else:
-                            bin_sin = bin(int(int_sin))[2:]
-                            if len(bin_sin)>8:
+            if ndl not in reg_posi:
+                v = datos[ndl].split(",")
+                drr = v[0].replace("(","")
+                dr1 = drr.replace(")","")
+                if len(v)>1:
+                    drr = v[1].replace("(","")
+                    dr2 = drr.replace(")","")
+                    if dr2[0] != "#" and dr2[0] != "b" and dr2[0] != "-" and literal_dec.search(dr2[0]) == None and (dr2 != "A" and dr2 != "B") and dr2[0] not in registros:
+                        print(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
+                        error = 1
+                    else:
+                        e_lit = True
+                        if dr2[0] == "#":
+                            lit_num = int(dr2[1:],base=16)
+                            lit_b = str(bin(lit_num))
+                            lit_p = lit_b[2:len(lit_b)]
+                        if dr2[0] == "b":
+                            lit_p = dr2[1:]
+                        if dr2[0] == "-":
+                            int_sin = dr2.replace("-","")
+                            if literal_dec.search(int_sin) == None:
                                 print(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
                                 error = 1
                             else:
-                                lit_p = bin(int(dr2) & 0b11111111)[2:]
-                    if literal_dec.search(dr2) != None:
-                        lit_p = bin(int(dr2))[2:]
-            if dr1[0] != "#" and dr1[0] != "b" and dr1[0] != "-" and literal_dec.search(dr1[0]) == None and dr1 != "A" and dr1 != "B" and e_lit == True:
-                print(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
-                error = 1
+                                bin_sin = bin(int(int_sin))[2:]
+                                if len(bin_sin)>8:
+                                    print(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
+                                    error = 1
+                                else:
+                                    lit_p = bin(int(dr2) & 0b11111111)[2:]
+                        if literal_dec.search(dr2) != None:
+                            lit_p = bin(int(dr2))[2:]
+                if dr1[0] != "#" and dr1[0] != "b" and dr1[0] != "-" and literal_dec.search(dr1[0]) == None and dr1 != "A" and dr1 != "B" and e_lit == True and dr1 not in registros:
+                    print(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
+                    error = 1
+                else:
+                    if dr1 == "B":
+                        if inst in instNOTSHLSHR or inst == "INC" or inst == "RST":
+                            e_lit = False
+                    else:
+                        e_lit = True
+                        if dr1[0] == "#":
+                            lit_num = int(dr1[1:],base=16)
+                            lit_b = str(bin(lit_num))
+                            lit_p = lit_b[2:len(lit_b)]
+                        if dr1[0] == "b":
+                            lit_p = dr1[1:]
+                        if dr1[0] == "-":
+                            int_sin = dr1.replace("-","")
+                            if literal_dec.search(int_sin) == None:
+                                print(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
+                                error = 1
+                            else:
+                                bin_sin = bin(int(int_sin))[2:]
+                                if len(bin_sin)>8:
+                                    print(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
+                                    error = 1
+                                else:
+                                    lit_p = bin(int(dr1) & 0b11111111)[2:]
+                        if literal_dec.search(dr1) != None:
+                            lit_p = bin(int(dr1))[2:]
+                if e_lit == True:
+                    if len(lit_p)>8:
+                        print(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
+                        error = 1
+                if e_lit == False:
+                    lit_p = "00000000"
             else:
-                if dr1 == "B":
-                    if inst in instNOTSHLSHR or inst == "INC" or inst == "RST":
-                        e_lit = False
-                else:
-                    e_lit = True
-                    if dr1[0] == "#":
-                        lit_num = int(dr1[1:],base=16)
-                        lit_b = str(bin(lit_num))
-                        lit_p = lit_b[2:len(lit_b)]
-                    if dr1[0] == "b":
-                        lit_p = dr1[1:]
-                    if dr1[0] == "-":
-                        int_sin = dr1.replace("-","")
-                        if literal_dec.search(int_sin) == None:
-                            print(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
-                            error = 1
-                        else:
-                            bin_sin = bin(int(int_sin))[2:]
-                            if len(bin_sin)>8:
-                                print(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
-                                error = 1
-                            else:
-                                lit_p = bin(int(dr1) & 0b11111111)[2:]
-                    if literal_dec.search(dr1) != None:
-                        lit_p = bin(int(dr1))[2:]
-            if e_lit == True:
-                if len(lit_p)>8:
-                    print(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
-                    error = 1
-            if e_lit == False:
-                lit_p = "00000000"
+                valores = datos[ndl].split(",")
+                reg1 = valores[0].replace("(","").replace(")","")
+                if len(valores) > 1:
+                    reg2 = valores[1].replace("(","").replace(")","")
+                    if reg2 in registros:
+                        lit_p = registros[reg2]
+                if reg1 in registros:
+                    lit_p = registros[reg1]
         else:
             lit_p = "00000000"
     else:
-        pass
+        literales.append(0)
     e_lit = False
-    literales.append(lit_p.zfill(8))
+    if inst != 0:
+        literales.append(lit_p.zfill(8))
     ndl+=1
 
 ndl = 0
@@ -361,7 +372,7 @@ if error != 1:
             else:
                 valores = datos[ndl].replace("(","").replace(")","").split(",")
                 valore = datos[ndl].split(",")
-                if literal.search(valores[1]) != None and valores[1]!= "A" and valores[1]!= "B":
+                if (literal.search(valores[1]) != None or valores[0] in registros) and valores[1]!= "A" and valores[1]!= "B":
                     if valores[0] == "A":
                         opcode = "0000010"
                     if valores[0] == "B":
@@ -371,7 +382,7 @@ if error != 1:
                             opcode = "0100101"
                         if valores[0] == "B":
                             opcode = "0100110"
-                if literal.search(valores[0]) != None and valores[0]!= "A" and valores[0]!= "B":
+                if (literal.search(valores[0]) != None or valores[0] in registros) and valores[0]!= "A" and valores[0]!= "B":
                     if valore[0][0]=="(":
                         if valores[1] == "A":
                             opcode = "0100111"
@@ -389,7 +400,7 @@ if error != 1:
                 valores = datos[ndl].replace("(","").replace(")","").split(",")
                 valore = datos[ndl].split(",")
                 if len(valores) == 2:
-                    if literal.search(valores[1]) != None and valores[1]!= "A" and valores[1]!= "B":
+                    if (literal.search(valores[1]) != None or valores[1] in registros) and valores[1]!= "A" and valores[1]!= "B":
                         if valores[0] == "A":
                             opcode = "0000110"
                         if valores[0] == "B":
@@ -596,7 +607,7 @@ if error != 1:
         if inst in jumps:
             ind = jumps.index(inst)
             opcode = jumps_opcode[ind]
-        if inst != 0 and inst != "" :
+        if inst != 0 and inst != "":
             traduccion.write(f'{opcode}{literales[ndl]}\n')                  
         ndl+=1
 if error == 0:
