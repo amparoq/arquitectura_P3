@@ -27,7 +27,7 @@ data_on = False
 registros = {} #para guardar la dirección de lo que está en data
 registros_valores = [] #para guardar mem
 
-codigo = open("p3F_1.ass",'r')
+codigo = open("p3F_2i.ass",'r')
 
 p = codigo.read()
 lineas = p.split("\n")
@@ -320,7 +320,7 @@ for inst in instrucciones:
                 drr = v[1].replace("(","")
                 dr2 = drr.replace(")","")
                 if dr2[0] != "#" and dr2[0] != "b" and dr2[0] != "-" and literal_dec.search(dr2[0]) == None and (dr2 != "A" and dr2 != "B") and dr2 not in registros:
-                    print(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} está usando una variable no declarada en bloque DATA\n')
+                    print(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} está usando una variable no declarada o mal declarada en bloque DATA\n')
                     error = 1
                 else:
                     e_lit = True
@@ -358,7 +358,7 @@ for inst in instrucciones:
                         if literal_dec.search(dr2) != None:
                             lit_p = bin(int(dr2))[2:]
             if dr1[0] != "#" and dr1[0] != "b" and dr1[0] != "-" and literal_dec.search(dr1[0]) == None and dr1 != "A" and dr1 != "B" and e_lit == True and dr1 not in registros:
-                print(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} está usando una variable no declarada en bloque DATA\n')
+                print(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} está usando una variable no declarada o mal declarada en bloque DATA\n')
                 error = 1
             else:
                 if dr1 == "B":
@@ -704,6 +704,3 @@ if error == 0:
     print("Todas las instrucciones existen")
 else:
     print("El código finalizó con errores")
-
-#dudas:
-#CALL solo pueden ser etiquetas? o numeros tmb?
