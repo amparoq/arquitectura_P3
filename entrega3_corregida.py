@@ -27,7 +27,7 @@ data_on = False
 registros = {} #para guardar la dirección de lo que está en data
 registros_valores = [] #para guardar mem
 
-codigo = open("p3F_2i.ass",'r')
+codigo = open("p3_2-correccion1.ass",'r')
 
 p = codigo.read()
 lineas = p.split("\n")
@@ -337,7 +337,7 @@ for inst in instrucciones:
                                 error = 1
                                 e_lit = False
                         if dr2[0] == "b":
-                            if literal_dec.search(dr2[0][1:])!=None:
+                            if literal_dec.search(dr2[1:])!=None:
                                 lit_p = dr2[1:]
                             else:
                                 print(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
