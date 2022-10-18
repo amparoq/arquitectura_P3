@@ -78,10 +78,10 @@ for linea in lineas:
                                     print(f'El registro {prim_seg[0]} tiene asignado un valor erróneo\n')
                             else:
                                 if prim_seg[1][0] == "b":
-                                    try:
+                                    if literal_dec.search(prim_seg[1][1:]) != None:
                                         num_bi = prim_seg[1:]
                                         num_encontrado = True
-                                    except:
+                                    else:
                                         print(f'El registro {prim_seg[0]} tiene asignado un valor erróneo\n')
                                 else:
                                     if prim_seg[1][0] == "-":
@@ -332,12 +332,17 @@ for inst in instrucciones:
                                 lit_num = int(dr2[1:],base=16)
                                 lit_b = str(bin(lit_num))
                                 lit_p = lit_b[2:len(lit_b)]
-                                e_lit = False
                             except:
                                 print(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
                                 error = 1
+                                e_lit = False
                         if dr2[0] == "b":
-                            lit_p = dr2[1:]
+                            if literal_dec.search(dr2[0][1:])!=None:
+                                lit_p = dr2[1:]
+                            else:
+                                print(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
+                                error = 1
+                                e_lit = False
                         if dr2[0] == "-":
                             int_sin = dr2.replace("-","")
                             if literal_dec.search(int_sin) == None:
@@ -369,12 +374,17 @@ for inst in instrucciones:
                                 lit_num = int(dr1[1:],base=16)
                                 lit_b = str(bin(lit_num))
                                 lit_p = lit_b[2:len(lit_b)]
-                                e_lit = False
                             except:
                                 print(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
                                 error = 1
+                                e_lit = False
                         if dr1[0] == "b":
-                            lit_p = dr1[1:]
+                            if literal_dec.search(dr1[1:])!=None:
+                                lit_p = dr1[1:]
+                            else:
+                                print(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no existe\n')
+                                error = 1
+                                e_lit = False
                         if dr1[0] == "-":
                             int_sin = dr1.replace("-","")
                             if literal_dec.search(int_sin) == None:
