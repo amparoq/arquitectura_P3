@@ -27,7 +27,7 @@ data_on = False
 registros = {} #para guardar la dirección de lo que está en data
 registros_valores = [] #para guardar mem
 
-codigo = open("p3_2-correccion1.ass",'r')
+codigo = open("p3F_1.ass",'r')
 
 p = codigo.read()
 lineas = p.split("\n")
@@ -411,10 +411,18 @@ for inst in instrucciones:
                 if len(valores) > 1:
                     reg2 = valores[1].replace("(","").replace(")","")
                     if reg2 in registros:
-                        lit_p = registros[reg2]
+                        if valores[1][0] == "(":
+                            lit_p = registros[reg2] #verlo acá
+                        else:
+                            print(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} está usando una variable sin paréntesis\n')
+                            error = 1
                 if reg1 in registros:
-                    lit_p = registros[reg1]
-        else:
+                    if valores[0][0] == "(":
+                        lit_p = registros[reg1] #verlo acá
+                    else:
+                        print(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} está usando una variable sin paréntesis\n')
+                        error = 1
+        else:  
             lit_p = "00000000"
     else:
         literales.append(0)
