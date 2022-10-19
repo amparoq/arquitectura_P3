@@ -27,18 +27,21 @@ data_on = False
 registros = {} #para guardar la dirección de lo que está en data
 registros_valores = [] #para guardar mem
 
-codigo = open("p3F_1.ass",'r')
+codigo = open("p3_1-correccion1.ass",'r')
 
 p = codigo.read()
 lineas = p.split("\n")
-if lineas[0] == "DATA:":
-    data_on = True
 
 instrucciones = []
 datos = []
 etiquetas = {}
 endata = False
 encode = False
+if lineas[0] == "DATA:":
+    data_on = True
+else:
+    encode = True
+    endata = False
 reg_posi = []
 ndl = 0
 ndl_codigo = 0
@@ -126,7 +129,6 @@ for linea in lineas:
                 if endata == True:
                     if lin[0] != "DATA:":
                         print(f'El registro {prim_seg[0]} no está siendo asignado ningún valor\n')
-
         else:
             if encode == True:
                 instrucciones.append(prim_seg[0])
