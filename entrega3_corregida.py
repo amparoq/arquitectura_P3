@@ -411,9 +411,17 @@ for inst in instrucciones:
                 if len(valores) > 1:
                     reg2 = valores[1].replace("(","").replace(")","")
                     if reg2 in registros:
-                        lit_p = registros[reg2] #verlo acá
+                        if valores[1][0] != "(":
+                            print(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no usó paréntesis al declarar una variable\n')
+                            error = 1
+                        else:
+                            lit_p = registros[reg2] #verlo acá
                 if reg1 in registros:
-                    lit_p = registros[reg1] #verlo acá
+                    if valores[0][0] != "(":
+                        print(f'La instrucción {inst} {datos[ndl]} de la linea {ndl+1} no usó paréntesis al declarar una variable\n')
+                        error = 1
+                    else:
+                        lit_p = registros[reg1] #verlo acá
         else:  
             lit_p = "00000000"
     else:
